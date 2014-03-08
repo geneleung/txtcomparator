@@ -1,7 +1,6 @@
 #include "stddefs.h"
-#include <stdio.h>
 
-#define MODULE_NAME "TEST_DATA_TYPES"
+#define LOG_TAG "TEST_DATA_TYPES"
 
 int testMechineType()
 {
@@ -17,10 +16,6 @@ int testMechineType()
     LOGD("uint64_t:%lu \r\n",sizeof(uint64_t));
     
     return 0;
-}
-int main()
-{
-    return testMechineType();
 }
 
 

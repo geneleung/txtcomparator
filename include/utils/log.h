@@ -44,16 +44,16 @@ typedef enum LOG_LEVEL_E
 
     
 #ifndef LOGV
-#define LOGV(...) __LOG_PRINT__(LOG_LEVEL_INFO, MODULE_NAME, __VA_ARGS__)
+#define LOGV(...) __LOG_PRINT__(LOG_LEVEL_INFO, LOG_TAG, __VA_ARGS__)
 #endif
 #ifndef LOGW
-#define LOGW(...) __LOG_PRINT__(LOG_LEVEL_WARNING, MODULE_NAME, __VA_ARGS__)
+#define LOGW(...) __LOG_PRINT__(LOG_LEVEL_WARNING, LOG_TAG, __VA_ARGS__)
 #endif
 #ifndef LOGD
-#define LOGD(...) __LOG_PRINT__(LOG_LEVEL_DEBUG, MODULE_NAME, __VA_ARGS__)
+#define LOGD(...) __LOG_PRINT__(LOG_LEVEL_DEBUG, LOG_TAG, __VA_ARGS__)
 #endif
 #ifndef LOGE
-#define LOGE(...) __LOG_PRINT__(LOG_LEVEL_ERROR, MODULE_NAME, __VA_ARGS__)
+#define LOGE(...) __LOG_PRINT__(LOG_LEVEL_ERROR, LOG_TAG, __VA_ARGS__)
 #endif
 
 
