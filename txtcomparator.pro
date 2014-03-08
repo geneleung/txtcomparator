@@ -16,6 +16,8 @@ TEMPLATE = app
 
 INCLUDEPATH  += include \
 
+DEFINES += PLATFORM_SMP #:for atomic operation,when on a smp machine
+
 
 SOURCES += main.cpp \
     utils/RefBase.cpp \
