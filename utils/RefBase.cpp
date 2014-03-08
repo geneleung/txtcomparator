@@ -24,8 +24,8 @@
 // #include <utils/threads.h>
 // #include <utils/TextOutput.h>
 #include "stddef.h"
-#include "../include/utils/atomic.h"
-#include "../include/utils/RefBase.h"
+#include "utils/atomic.h"
+#include "utils/RefBase.h"
 //:end 
 #include <stdlib.h>
 #include <stdio.h>

@@ -40,7 +40,11 @@ extern "C" {
  */
 //: by liangzhen
 //: this shoud be add when make
+#ifndef PLATFORM_SMP
 #define ANDROID_SMP 0
+#else
+#define ANDROID_SMP 1
+#endif
 #define android_atomic_write android_atomic_release_store
 #define android_atomic_cmpxchg android_atomic_release_cas
 //#define inline
