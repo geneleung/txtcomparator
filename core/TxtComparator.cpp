@@ -15,8 +15,6 @@ TxtComparator::~TxtComparator()
 }
 void TxtComparator::compare(const uint8_t *srcFile,const uint8_t *refFile)
 {
-    //
-    LOGD("compare two files!MatrixNode size:%ld",sizeof(MatrixNode));
     char *src = "481234781";
     char *ref = "4411327431";
     uint32_t maxLine = strlen(src) + 1;
@@ -41,29 +39,29 @@ void TxtComparator::compareMatrix(MatrixNode *matrix,const uint8_t *src,const ui
 	{
 	    if(src[i-1] == ref[j-1])
 	    {
-		(matrix + i * maxLine + j) -> type = MATRIX_NODE_TYPE_KEY;
+		(matrix + i * maxColumn + j) -> type = MATRIX_NODE_TYPE_KEY;
 		
-		(matrix + i * maxLine + j) -> maxSubsequenceLen = (matrix + (i-1)*maxLine + j-1) -> maxSubsequenceLen + 1;
-		
-		if(MATRIX_NODE_TYPE_KEY == (matrix + (i-1)*maxLine + j-1) -> type)
+		(matrix + i * maxColumn + j) -> maxSubsequenceLen = 1 + (matrix + (i-1)*maxColumn + j-1) -> maxSubsequenceLen;
+
+		if(MATRIX_NODE_TYPE_KEY == (matrix + (i-1)*maxColumn + j-1) -> type)
 		{
 		    // 记录上一相邻匹配节点，并增加相邻匹配节点权重
-		    (matrix + i * maxLine +j) -> preNode = (matrix + (i-1)*maxLine + j-1);
-		    (matrix + i * maxLine +j) -> weight = (matrix + i * maxLine +j) -> preNode->weight + 1;
-		    MatrixNode *temp = (matrix + i * maxLine +j) -> preNode;
+		    (matrix + i * maxColumn +j) -> preNode = (matrix + (i-1)*maxColumn + j-1);
+		    (matrix + i * maxColumn +j) -> weight = (matrix + i * maxColumn +j) -> preNode->weight + 1;
+		    MatrixNode *temp = (matrix + i * maxColumn +j) -> preNode;
 		    do{
 			temp->weight ++;
 			temp = temp -> preNode;
 		    }
 		    while(NULL != temp);		    
 		}else{
-		    (matrix + i * maxLine +j) -> weight = 1; // 第一个相邻匹配节点，权重为1
+		    (matrix + i * maxColumn +j) -> weight = 1; // 第一个相邻匹配节点，权重为1
 		}
 	    }else{
-		(matrix + i * maxLine + j) -> maxSubsequenceLen =
-		    ((matrix + i*maxLine + j-1) -> maxSubsequenceLen > (matrix + (i-1)*maxLine + j) ->  maxSubsequenceLen)?
-		    (matrix + i*maxLine + j-1) -> maxSubsequenceLen:
-		    (matrix + (i-1)*maxLine + j) -> maxSubsequenceLen;
+		(matrix + i * maxColumn + j) -> maxSubsequenceLen =
+		    ((matrix + i*maxColumn + j-1) -> maxSubsequenceLen > (matrix + (i-1)*maxColumn + j) ->  maxSubsequenceLen)?
+		    (matrix + i*maxColumn + j-1) -> maxSubsequenceLen:
+		    (matrix + (i-1)*maxColumn + j) -> maxSubsequenceLen;
 	    }
 	}
     }
@@ -79,7 +77,7 @@ void TxtComparator::dumpMatrixValue(MatrixNode *matrix,uint64_t maxLine,uint64_t
     {
 	for(j = 0; j < maxColumn; j++)
 	{
-	    printf("%2d",(matrix + i * maxLine +j) -> maxSubsequenceLen);
+	    printf("%2d",(matrix + i * maxColumn +j) -> maxSubsequenceLen);
 	}
 	printf("\r\n");
     }
@@ -90,7 +88,7 @@ void TxtComparator::dumpMatrixValue(MatrixNode *matrix,uint64_t maxLine,uint64_t
     {
 	for(j = 0; j < maxColumn; j++)
 	{
-	    printf("%2d",(matrix + i * maxLine +j) -> weight);
+	    printf("%2d",(matrix + i * maxColumn +j) -> weight);
 	}
 	printf("\r\n");
     }
