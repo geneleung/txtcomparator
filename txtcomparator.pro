@@ -22,7 +22,8 @@ DEFINES += PLATFORM_SMP #:for atomic operation,when on a smp machine
 SOURCES += main.cpp \
     utils/RefBase.cpp \
     test/testdatatypes.cpp \
-    test/testSP.cpp
+    test/testSP.cpp \
+    core/TxtComparator.cpp
 
 HEADERS += \
     include/stddefs.h \
@@ -31,4 +32,5 @@ HEADERS += \
     include/utils/atomic.h \
     include/utils/log.h \
     include/utils/RefBase.h \
-    include/utils/StrongPointer.h
+    include/utils/StrongPointer.h \
+    include/core/TxtComparator.h
