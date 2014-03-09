@@ -8,7 +8,7 @@ public:
     TxtComparator();
     virtual ~TxtComparator();
     void compare(const uint8_t *srcFile,const uint8_t *refFile);
-private:
+public:
     enum {
         MATRIX_NODE_TYPE_NONE  = 0,
         MATRIX_NODE_TYPE_KEY,
@@ -16,16 +16,19 @@ private:
 	MATRIX_NODE_TYPE_DEL,
 	MATRIX_NODE_TYPE_MODIFY,
     };
-
     // 方便处理大文件，直接使用内存映射
     struct MatrixNode
     {
-	// uint8_t type;	      	// :是否是关键节点，关键节点即匹配节点
 	uint64_t maxSubsequenceLen;//:max file size 2^64 = 2^14 PB,very large,that is enough~
-	uint64_t weight; //:相邻匹配字符数，用以尽量匹配最长的字串
-	MatrixNode *preNode; //:前一个相邻匹配节点，用以修改节点权重
+	// uint64_t line;
+	// uint64_t column;
+	uint64_t maxColumn;
+	MatrixNode *nextNode; //:下一个输出节点
 	uint32_t type;	      	// :放末尾，32位机对齐
+	uint8_t value;
+	MatrixNode *get(uint64_t i,uint64_t j);
     };
+private:
     /*
      *matrix指针所指空间比较足够大，此函数不做越界检查
      * 生成对比矩阵，每个矩阵节点包含对应最大公共字串和权重
