@@ -29,9 +29,10 @@ void TxtComparator::compare(const char *srcFile,const char *refFile)
     uint32_t maxColumn = strlen(ref) + 1;
 
     MatrixNode *matrix = new MatrixNode[maxLine*maxColumn];
+
     compareMatrix(matrix,(uint8_t*)src,(uint8_t*)ref,maxLine,maxColumn);
-    dumpMatrixValue(matrix,maxLine,maxColumn);
-    outputMatrix(getOutputMatrix(matrix,maxLine,maxColumn),"/Users/liangzhen/compare.html");
+    MatrixNode *m = getOutputMatrix(matrix,maxLine,maxColumn);
+    outputMatrix(m,"/Users/liangzhen/compare.html");
 }
 void TxtComparator::compareMatrix(MatrixNode *matrix,const uint8_t *src,const uint8_t *ref,uint64_t maxLine,uint64_t maxColumn)
 {
@@ -89,34 +90,37 @@ static int getMaxLocation(uint64_t a,uint64_t b,uint64_t c)
 	    return 4;
     return a>b?(a>c?1:3):(b>c?2:3);  
 }
-static void moveDiag(TxtComparator::MatrixNode * matrix,uint64_t *pi,uint64_t *pj)
+static void moveDiag(TxtComparator::MatrixNode * matrix,uint64_t *pi,uint64_t *pj,uint64_t maxColumn)
 {
     uint64_t i = *pi;
     uint64_t j = *pj;
 
-    LOGD("move diag %d",matrix->get(i,j)->type);
-    matrix->get(i-1,j-1) ->  nextNode = matrix->get(i,j);
+    LOGD("move diag %d",(matrix + i * maxColumn + j) -> type);
+    (matrix + (i-1) * maxColumn + j-1) -> nextNode = (matrix + i * maxColumn + j);
     // 节点类型由外部修改 key or modify
     *pi = i - 1;
     *pj = j - 1;
 }
-static void moveUp(TxtComparator::MatrixNode * matrix,uint64_t *pi,uint64_t *pj)
+static void moveUp(TxtComparator::MatrixNode * matrix,uint64_t *pi,uint64_t *pj,uint64_t maxColumn)
 {
     uint64_t i = *pi;
     uint64_t j = *pj;
     
-    matrix->get(i,j) -> type = TxtComparator::MATRIX_NODE_TYPE_ADD;
-    LOGD("move up %d",matrix->get(i,j)->type);
-    matrix->get(i-1,j) -> nextNode = matrix->get(i,j);
+    (matrix + i * maxColumn + j) -> type = TxtComparator::MATRIX_NODE_TYPE_ADD;
+    LOGD("move up %d",(matrix + i * maxColumn + j) -> type);
+    (matrix + (i-1) * maxColumn + j) -> nextNode = (matrix + i * maxColumn + j);
+
     *pi = i - 1;
 }
-static void moveLeft(TxtComparator::MatrixNode * matrix,uint64_t *pi,uint64_t *pj)
+static void moveLeft(TxtComparator::MatrixNode * matrix,uint64_t *pi,uint64_t *pj,uint64_t maxColumn)
 {
     uint64_t i = *pi;
     uint64_t j = *pj;
-    matrix->get(i,j) -> type = TxtComparator::MATRIX_NODE_TYPE_DEL;
-    LOGD("move left %d",matrix->get(i,j)->type);
-    matrix->get(i,j-1) -> nextNode = matrix->get(i,j);
+
+    (matrix + i * maxColumn + j) -> type = TxtComparator::MATRIX_NODE_TYPE_DEL;
+    LOGD("move left %d",(matrix + i * maxColumn + j) -> type);
+    (matrix + i * maxColumn + j-1) -> nextNode = (matrix + i * maxColumn + j);
+
     *pj = j - 1;
 }
 TxtComparator::MatrixNode *TxtComparator::getOutputMatrix(MatrixNode *matrix,uint64_t maxLine,uint64_t maxColumn)
@@ -136,17 +140,17 @@ TxtComparator::MatrixNode *TxtComparator::getOutputMatrix(MatrixNode *matrix,uin
 		case 5:
 		case 6:
 		case 7:
-		    matrix->get(i,j)->type = MATRIX_NODE_TYPE_KEY;
-		    moveDiag(matrix,&i,&j);break;
+		    (matrix + i * maxColumn + j) -> type = MATRIX_NODE_TYPE_KEY;
+		    moveDiag(matrix,&i,&j,maxColumn);break;
 		case 2:
-		    moveUp(matrix,&i,&j);break;
+		    moveUp(matrix,&i,&j,maxColumn);break;
 		case 3:
-		    moveLeft(matrix,&i,&j);break;
+		    moveLeft(matrix,&i,&j,maxColumn);break;
 		case 4:
 		    if(i < j)
-			moveUp(matrix,&i,&j);
+			moveUp(matrix,&i,&j,maxColumn);
 		    else
-			moveLeft(matrix,&i,&j);
+			moveLeft(matrix,&i,&j,maxColumn);
 		    break;
 		default:
 		    // do nothing
@@ -156,42 +160,42 @@ TxtComparator::MatrixNode *TxtComparator::getOutputMatrix(MatrixNode *matrix,uin
 		switch(max)
 		{
 		case 1:
-		    matrix->get(i,j)->type = MATRIX_NODE_TYPE_MODIFY;
-		    moveDiag(matrix,&i,&j);break;
+		    (matrix + i * maxColumn + j)->type = MATRIX_NODE_TYPE_MODIFY;
+		    moveDiag(matrix,&i,&j,maxColumn);break;
 		case 2:
-		    moveUp(matrix,&i,&j);break;
+		    moveUp(matrix,&i,&j,maxColumn);break;
 		case 3:
-		    moveLeft(matrix,&i,&j);break;
+		    moveLeft(matrix,&i,&j,maxColumn);break;
 		case 4:
 		    if(i < j)
-			moveUp(matrix,&i,&j);
+			moveUp(matrix,&i,&j,maxColumn);
 		    else
-			moveLeft(matrix,&i,&j);
+			moveLeft(matrix,&i,&j,maxColumn);
 		    break;
 		case 5:
 		    if(i > j)
-			moveLeft(matrix,&i,&j);
+			moveLeft(matrix,&i,&j,maxColumn);
 		    else{
-			matrix->get(i,j)->type = MATRIX_NODE_TYPE_MODIFY;
-			moveDiag(matrix,&i,&j);
+			(matrix + i * maxColumn + j)->type = MATRIX_NODE_TYPE_MODIFY;
+			moveDiag(matrix,&i,&j,maxColumn);
 		    }
 		    break;
 		case 6:
 		    if(i < j)
-			moveUp(matrix,&i,&j);
+			moveUp(matrix,&i,&j,maxColumn);
 		    else{
-			matrix->get(i,j)->type = MATRIX_NODE_TYPE_MODIFY;
-			moveDiag(matrix,&i,&j);
+			(matrix + i * maxColumn + j)->type = MATRIX_NODE_TYPE_MODIFY;
+			moveDiag(matrix,&i,&j,maxColumn);
 		    }
 		    break;
 		case 7:
 		    if(i > j)
-			moveLeft(matrix,&i,&j);
+			moveLeft(matrix,&i,&j,maxColumn);
 		    else if(i < j)
-			moveUp(matrix,&i,&j);
+			moveUp(matrix,&i,&j,maxColumn);
 		    else{
-			matrix->get(i,j)->type = MATRIX_NODE_TYPE_MODIFY;
-			moveDiag(matrix,&i,&j);
+			(matrix + i * maxColumn + j)->type = MATRIX_NODE_TYPE_MODIFY;
+			moveDiag(matrix,&i,&j,maxColumn);
 		    }
 		default:
 		    // do nothing
@@ -200,17 +204,17 @@ TxtComparator::MatrixNode *TxtComparator::getOutputMatrix(MatrixNode *matrix,uin
 	    }
 	}else if(i > 0){
 	    // j must be 0,just move up
-	    moveUp(matrix,&i,&j);
+	    moveUp(matrix,&i,&j,maxColumn);
 	}else if(j > 0){
 	    // i must be 0,just move left
-	    moveLeft(matrix,&i,&j);
+	    moveLeft(matrix,&i,&j,maxColumn);
 	}else{
 	    // first node
 	    break;
 	}
     }while(true);
 
-    return matrix->get(0,0)->nextNode;
+    return matrix->nextNode;
 }
 bool TxtComparator::outputMatrix(MatrixNode *matrix,const char *outputFile)
 {
@@ -221,6 +225,15 @@ bool TxtComparator::outputMatrix(MatrixNode *matrix,const char *outputFile)
 	return false;
     }
 
+    // 写入显示样式
+    char css[] = "\
+<style type=\"text/css\"> \
+.key{color:black;}\
+.add{color:blue;}\
+.mod{color:red;}\
+</style>";
+    fwrite(css,sizeof(css),1,fp);
+    // :end
     MatrixNode *tmp = matrix;
     char buf[sizeof("<span class=\"key\"></span>") + 1];
     memset(buf,0,sizeof(buf));
@@ -247,10 +260,6 @@ bool TxtComparator::outputMatrix(MatrixNode *matrix,const char *outputFile)
     fclose(fp);
     return true;
 }
-TxtComparator::MatrixNode *TxtComparator::MatrixNode::get(uint64_t i,uint64_t j)
-{
-    return this + i * maxColumn + j;
-}
 void TxtComparator::dumpMatrixValue(MatrixNode *matrix,uint64_t maxLine,uint64_t maxColumn)
 {
     int i,j;
@@ -258,27 +267,8 @@ void TxtComparator::dumpMatrixValue(MatrixNode *matrix,uint64_t maxLine,uint64_t
     {
 	for(j = 0; j < maxColumn; j++)
 	{
-	    printf("%2d",(matrix + i * maxColumn +j) -> maxSubsequenceLen);
+	    printf("%2d %c %p",(matrix + i * maxColumn +j) -> maxSubsequenceLen,(matrix + i * maxColumn +j) -> value,(matrix + i * maxColumn +j) -> nextNode);
 	}
 	printf("\r\n");
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

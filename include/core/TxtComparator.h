@@ -22,11 +22,9 @@ public:
 	uint64_t maxSubsequenceLen;//:max file size 2^64 = 2^14 PB,very large,that is enough~
 	// uint64_t line;
 	// uint64_t column;
-	uint64_t maxColumn;
 	MatrixNode *nextNode; //:下一个输出节点
 	uint32_t type;	      	// :放末尾，32位机对齐
 	uint8_t value;
-	MatrixNode *get(uint64_t i,uint64_t j);
     };
 private:
     /*
