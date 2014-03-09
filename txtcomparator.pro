@@ -14,7 +14,7 @@ CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-INCLUDEPATH  += include \
+INCLUDEPATH  += $$PWD/include \
 
 DEFINES += PLATFORM_SMP #:for atomic operation,when on a smp machine
 
