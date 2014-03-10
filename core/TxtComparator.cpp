@@ -25,8 +25,13 @@ void TxtComparator::compare(const char *srcFile,const char *refFile)
     // char *ref = "4411327431";
     // char *src = "2222221";
     // char *ref = "133333";
-    char *src = "1222222";
-    char *ref = "333331";
+    // char *src = "1222222";
+    // char *ref = "1";
+    // char *src = "1";
+    // char *ref = "333312222";
+    char *src = "中文匹配符号。";
+    char *ref = "看中文的匹配，还有符号";
+
 
     uint32_t maxLine = strlen(src) + 1;
     uint32_t maxColumn = strlen(ref) + 1;
@@ -227,7 +232,7 @@ TxtComparator::MatrixNode *TxtComparator::getOutputMatrix(MatrixNode *matrix,uin
 }
 bool TxtComparator::outputMatrix(MatrixNode *matrix,const char *outputFile)
 {
-    FILE * fp = fopen(outputFile,"w+");
+    FILE * fp = fopen(outputFile,"wb+");
     if(NULL == fp)
     {
 	LOGE("open output file err!");
@@ -251,19 +256,27 @@ bool TxtComparator::outputMatrix(MatrixNode *matrix,const char *outputFile)
 	switch(tmp->type)
 	{
 	case MATRIX_NODE_TYPE_KEY:
-	    sprintf(buf, "<span class=\"key\">%c</span>", tmp->value);break;
+	    fwrite("<span class=\"key\">",sizeof("<span class=\"key\">"),1,fp);
+	    fwrite(&(tmp->value),sizeof(uint8_t),1,fp);
+	    fwrite("</span>",sizeof("</span>"),1,fp);
+	    break;
 	case MATRIX_NODE_TYPE_ADD:
-	    sprintf(buf, "<span class=\"add\">%c</span>", tmp->value);break;
+	    fwrite("<span class=\"add\">",sizeof("<span class=\"add\">"),1,fp);
+	    fwrite(&(tmp->value),sizeof(uint8_t),1,fp);
+	    fwrite("</span>",sizeof("</span>"),1,fp);
+	    break;
 	case MATRIX_NODE_TYPE_DEL:
-	    sprintf(buf, "<span class=\"del\">_</span>");break;
+	    fwrite("<span class=\"del\">_</span>",sizeof("<span class=\"del\">_</span>"),1,fp);break;
 	case MATRIX_NODE_TYPE_MODIFY:
-	    sprintf(buf, "<span class=\"mod\">%c</span>", tmp->value);break;
+	    fwrite("<span class=\"mod\">",sizeof("<span class=\"mod\">"),1,fp);
+	    fwrite(&(tmp->value),sizeof(uint8_t),1,fp);
+	    fwrite("</span>",sizeof("</span>"),1,fp);
+	    break;
 	default:
 	    LOGE("unkown output node type!%d",tmp->type);
 	    fclose(fp);
 	    return false;
 	}
-	fwrite(buf,sizeof(buf),1,fp);
 	tmp = tmp -> nextNode;
     }
     fclose(fp);
@@ -298,16 +311,3 @@ void TxtComparator::dumpMatrixValue(MatrixNode *matrix,uint64_t maxLine,uint64_t
 	printf("\r\n");
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
