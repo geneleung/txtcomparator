@@ -7,7 +7,7 @@ class TxtComparator:public virtual android::RefBase
 public:
     TxtComparator();
     virtual ~TxtComparator();
-    void compare(const char *srcFile,const char *refFile);
+    bool compare(const char *srcFile,const char *refFile,const char *outputFile);
 public:
     enum {
         MATRIX_NODE_TYPE_NONE  = 0,
@@ -30,14 +30,13 @@ private:
     /*
      *matrix指针所指空间比较足够大，此函数不做越界检查
      * 生成对比矩阵，每个矩阵节点包含对应最大公共字串和权重
-     * TODO:utf-8字符对比
      */
-    void compareMatrix(MatrixNode *matrix,const uint8_t *src,const uint8_t *ref,uint64_t srcLen,uint64_t refLen);
+    void compareMatrix(MatrixNode *matrix,const uint8_t *src,const uint8_t *ref,uint64_t maxLine,uint64_t maxColumn);
     /*
      *根据对比矩阵输出对比文件
      */
     MatrixNode *getOutputMatrix(MatrixNode *matrix,uint64_t maxLine,uint64_t maxColumn);
-    bool outputMatrix(MatrixNode *matrix,const char *outputFile);
+    bool outputMatrix(MatrixNode *matrix,FILE *fp);
     // :for test
     void dumpMatrixValue(MatrixNode *matrix,uint64_t maxLine,uint64_t maxColumn,char *src,char *ref);
     // :end

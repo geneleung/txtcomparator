@@ -13,35 +13,142 @@ TxtComparator::~TxtComparator()
     //
     LOGD("destroy TxtComparator!");
 }
-void TxtComparator::compare(const char *srcFile,const char *refFile)
+bool TxtComparator::compare(const char *srcFile,const char *refFile,const char *outputFile)
 {
-    // char *src = "481234781";
-    // char *ref = "4411327431";
-    // char *src = "2325167";
-    // char *ref = "1233257";
-    // char *src = "1111223336668800000";
-    // char *ref = "22335555555666678890000001";
-    // char *src = "481234781";
-    // char *ref = "4411327431";
-    // char *src = "2222221";
-    // char *ref = "133333";
-    // char *src = "1222222";
-    // char *ref = "1";
-    // char *src = "1";
-    // char *ref = "333312222";
-    char *src = "中文匹配符号。";
-    char *ref = "看中文的匹配，还有符号";
+    bool ret = true;
+    // step 1. open file ,and check
+    FILE * fpSrc = fopen(srcFile,"rb");
+    FILE * fpRef = fopen(refFile,"rb");
+    FILE * fpOut = fopen(outputFile,"wb+");
+    if(NULL == fpSrc)
+    {
+    	LOGE("open src file err!");
+	fclose(fpSrc);
+    	return false;
+    }
+    if(NULL == fpRef)
+    {
+    	LOGE("open ref file err!");
+	fclose(fpRef);
+    	return false;
+    }
+    if(NULL == fpOut)
+    {
+    	LOGE("open output file err!");
+	fclose(fpOut);
+    	return false;
+    }
+    // step 2. get file len
+    fseek(fpSrc,0,SEEK_END);
+    uint64_t maxLine = ftell(fpSrc) + 1; // TODO:if ftell faild???
+    fseek(fpSrc,0,SEEK_SET);
 
-
-    uint32_t maxLine = strlen(src) + 1;
-    uint32_t maxColumn = strlen(ref) + 1;
-
-    MatrixNode *matrix = new MatrixNode[maxLine*maxColumn];
-
-    compareMatrix(matrix,(uint8_t*)src,(uint8_t*)ref,maxLine,maxColumn);
-    dumpMatrixValue(matrix,maxLine,maxColumn,src,ref);
-    MatrixNode *m = getOutputMatrix(matrix,maxLine,maxColumn);
-    outputMatrix(m,"/Users/liangzhen/compare.html");
+    fseek(fpRef,0,SEEK_END);
+    uint64_t maxColumn = ftell(fpRef) + 1;
+    fseek(fpRef,0,SEEK_SET);
+    LOGD("maxLine %ld,maxColumn %ld",maxLine,maxColumn);
+    // step 3.compare len
+    // 对比时尽量使用内存对比，因为需要索引访问内存数据，如果使用文件映射的方式，需要io，索引访问效率会降低
+    // 但是当需要对比的文件很大时，打开文件需要用的时间已经和索引访问和对比的时间在同一个数量级，此时使用文件映射的方式，时间主要消耗在对比操作上
+    do{
+	if(0 == maxLine -1)
+	{
+	    // delete all
+	    fwrite("<span class=\"del\">",sizeof("<span class=\"del\">"),1,fpOut);
+	    maxColumn --;
+	    while(maxColumn > 0)
+	    {
+		fwrite("_",sizeof("_"),1,fpOut);
+		maxColumn --;
+	    }
+	    fwrite("</span>",sizeof("</span>"),1,fpOut);
+	    break;		// close file and return
+	}
+	if(10*1024*1024/* 10M */ > maxLine - 1)
+	{
+	    if(0 == maxColumn - 1)
+	    {
+		// add all
+		fwrite("<span class=\"add\">",sizeof("<span class=\"add\">"),1,fpOut);
+		char tmp = 0;
+		while(!feof(fpSrc))
+		{
+		    fread(&tmp,1,1,fpSrc);
+		    fwrite(&tmp,1,1,fpOut);
+		}
+		fwrite("</span>",sizeof("</span>"),1,fpOut);
+		break;		// close file and return
+	    }
+	    if(10*1024*1024/* 10M */ > maxColumn - 1)
+	    {
+		// compare by memery
+		char *src = new char[maxLine - 1];
+		char *ref = new char[maxColumn - 1];
+		char *srcIndex = src;
+		char *refIndex = ref;
+		MatrixNode *matrix = new MatrixNode[maxLine*maxColumn];
+		if((NULL == src)||(NULL == ref)||(NULL == matrix))
+		{
+		    LOGE("no memery for compare!");
+		    if(src)delete[] src;
+		    if(ref)delete[] ref;
+		    if(matrix)delete[] matrix;
+		    ret = false;
+		    break;
+		}
+		while(!feof(fpSrc))fread(srcIndex++,1,1,fpSrc);
+		while(!feof(fpRef))fread(refIndex++,1,1,fpRef);
+		compareMatrix(matrix,(uint8_t*)src,(uint8_t*)ref,maxLine,maxColumn);
+		ret = outputMatrix(getOutputMatrix(matrix,maxLine,maxColumn),fpOut);
+		fflush(fpOut);
+		delete[] src;
+		delete[] ref;
+		delete[] matrix;
+		break;
+	    }
+	    if(10*1024*1024/* 10M */ <= maxColumn - 1)
+	    {
+		// src use memery,ref use map file,matrix use map file
+		LOGE("file is too big,next version will support,thank you!");
+		ret = false;
+		break;
+	    }
+	}
+	if(10*1024*1024/* 10M */ <= maxLine - 1)// src file too big,use file mmap
+	{
+	    if(0 == maxColumn - 1)
+	    {
+		// add all
+		fwrite("<span class=\"add\">",sizeof("<span class=\"add\">"),1,fpOut);
+		char tmp = 0;
+		while(!feof(fpSrc))
+		{
+		    fread(&tmp,1,1,fpSrc);
+		    fwrite(&tmp,1,1,fpOut);
+		}
+		fwrite("</span>",sizeof("</span>"),1,fpOut);
+		break;		// close file and return
+	    }
+	    if(10*1024*1024/* 10M */ > maxColumn - 1)
+	    {
+		// src use map file,ref use memery,matrix use map file
+		LOGE("file is too big,next version will support,thank you!");
+		ret = false;
+		break;
+	    }
+	    if(10*1024*1024/* 10M */ <= maxColumn - 1)
+	    {
+		// all use map file
+		LOGE("file is too big,next version will support,thank you!");
+		ret = false;
+		break;
+	    }
+	}
+    }while(true);
+    fclose(fpSrc);
+    fclose(fpRef);
+    fclose(fpOut);
+    return ret;
 }
 void TxtComparator::compareMatrix(MatrixNode *matrix,const uint8_t *src,const uint8_t *ref,uint64_t maxLine,uint64_t maxColumn)
 {
@@ -230,14 +337,14 @@ TxtComparator::MatrixNode *TxtComparator::getOutputMatrix(MatrixNode *matrix,uin
 
     return matrix->nextNode;
 }
-bool TxtComparator::outputMatrix(MatrixNode *matrix,const char *outputFile)
+bool TxtComparator::outputMatrix(MatrixNode *matrix,FILE *fp)
 {
-    FILE * fp = fopen(outputFile,"wb+");
-    if(NULL == fp)
-    {
-	LOGE("open output file err!");
-	return false;
-    }
+    // FILE * fp = fopen(outputFile,"wb+");
+    // if(NULL == fp)
+    // {
+    // 	LOGE("open output file err!");
+    // 	return false;
+    // }
 
     // 写入显示样式
     char css[] = "\
@@ -295,7 +402,7 @@ bool TxtComparator::outputMatrix(MatrixNode *matrix,const char *outputFile)
 	}
 	// tmp = tmp -> nextNode;
     }
-    fclose(fp);
+    // fclose(fp);
     return true;
 }
 void TxtComparator::dumpMatrixValue(MatrixNode *matrix,uint64_t maxLine,uint64_t maxColumn,char *src,char *ref)
