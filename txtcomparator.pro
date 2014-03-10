@@ -4,15 +4,13 @@
 #
 #-------------------------------------------------
 
-QT       += core
-
-QT       -= gui
+QT += widgets
 
 TARGET = txtcomparator
-CONFIG   += console
-CONFIG   -= app_bundle
+#CONFIG   += console
+#CONFIG   -= app_bundle
 
-TEMPLATE = app
+#TEMPLATE = app
 
 INCLUDEPATH  += $$PWD/include \
 
@@ -23,7 +21,8 @@ SOURCES += main.cpp \
     utils/RefBase.cpp \
     test/testdatatypes.cpp \
     test/testSP.cpp \
-    core/TxtComparator.cpp
+    core/TxtComparator.cpp \
+    ui/window.cpp
 
 HEADERS += \
     include/stddefs.h \
@@ -33,4 +32,5 @@ HEADERS += \
     include/utils/log.h \
     include/utils/RefBase.h \
     include/utils/StrongPointer.h \
-    include/core/TxtComparator.h
+    include/core/TxtComparator.h \
+    include/ui/window.h
