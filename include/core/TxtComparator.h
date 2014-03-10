@@ -39,7 +39,7 @@ private:
     MatrixNode *getOutputMatrix(MatrixNode *matrix,uint64_t maxLine,uint64_t maxColumn);
     bool outputMatrix(MatrixNode *matrix,const char *outputFile);
     // :for test
-    void dumpMatrixValue(MatrixNode *matrix,uint64_t maxLine,uint64_t maxColumn);
+    void dumpMatrixValue(MatrixNode *matrix,uint64_t maxLine,uint64_t maxColumn,char *src,char *ref);
     // :end
 
 private:
