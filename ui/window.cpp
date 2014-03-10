@@ -1,6 +1,7 @@
 #include <QtWidgets>
 
 #include "ui/window.h"
+#include "ui/compareThread.h"
 #include "core/TxtComparator.h"
 
 Window::Window(QWidget *parent)
@@ -73,6 +74,7 @@ void Window::outBrowse()
 }
 void Window::compare()
 {
+    disableAll();
     QString src = srcComboBox->currentText();
     QString ref = refComboBox->currentText();
     QString out = outComboBox->currentText(); // out is a directory,give a default name
@@ -89,8 +91,27 @@ void Window::compare()
     const char* cout = sout.c_str();
 
     android::sp<TxtComparator> comparator = new TxtComparator();
-    comparator->compare(cstr,cref,cout);
+    // comparator->compare(cstr,cref,cout);
+    CompareThread *thread = new CompareThread(comparator, cstr, cref, cout);
+    thread->start();
 
+    QProgressDialog progressDialog(this);
+    progressDialog.setCancelButtonText(tr("&Cancel"));
+    progressDialog.setRange(0, 100);
+    progressDialog.setWindowTitle(tr("Compareing..."));
+
+    while(thread -> isRunning())
+    {
+	QThread::sleep(1);
+	progressDialog.setValue(comparator -> getPercent());
+	progressDialog.setLabelText(tr("%1%").arg(comparator -> getPercent()));
+	
+	qApp->processEvents();
+
+	if (progressDialog.wasCanceled())
+	    comparator -> stop();
+    }
+    enableAll();
 }
 
 QPushButton *Window::createButton(const QString &text, const char *member)
@@ -108,5 +129,46 @@ QComboBox *Window::createComboBox(const QString &text)
     comboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     return comboBox;
 }
+void Window::disableAll()
+{
+    srcComboBox -> setEnabled(false);
+    refComboBox -> setEnabled(false);
+    outComboBox -> setEnabled(false);
+    
+    srcBrowseButton -> setEnabled(false);
+    refBrowseButton -> setEnabled(false);
+    outBrowseButton -> setEnabled(false);
+    
+    compareButton -> setEnabled(false);
+
+}
+void Window::enableAll()
+{
+    srcComboBox -> setEnabled(true);
+    refComboBox -> setEnabled(true);
+    outComboBox -> setEnabled(true);
+    
+    srcBrowseButton -> setEnabled(true);
+    refBrowseButton -> setEnabled(true);
+    outBrowseButton -> setEnabled(true);
+    
+    compareButton -> setEnabled(true);    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

@@ -22,7 +22,8 @@ SOURCES += main.cpp \
     test/testdatatypes.cpp \
     test/testSP.cpp \
     core/TxtComparator.cpp \
-    ui/window.cpp
+    ui/window.cpp \
+    ui/compareThread.cpp
 
 HEADERS += \
     include/stddefs.h \
@@ -33,4 +34,5 @@ HEADERS += \
     include/utils/RefBase.h \
     include/utils/StrongPointer.h \
     include/core/TxtComparator.h \
-    include/ui/window.h
+    include/ui/window.h \
+    include/ui/compareThread.h

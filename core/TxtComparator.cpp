@@ -5,6 +5,7 @@
 #define LOG_TAG "TXT_COMPARATOR"
 
 TxtComparator::TxtComparator()
+    :isRuning(true),totalSize(0),currentSize(0)
 {
     // 
 }
@@ -12,6 +13,16 @@ TxtComparator::~TxtComparator()
 {
     //
     LOGD("destroy TxtComparator!");
+}
+void TxtComparator::stop()
+{
+    isRuning = false;
+}
+uint32_t TxtComparator::getPercent()
+{
+    if(0 == totalSize)
+	return 0;
+    return currentSize/totalSize;
 }
 bool TxtComparator::compare(const char *srcFile,const char *refFile,const char *outputFile)
 {
@@ -47,6 +58,9 @@ bool TxtComparator::compare(const char *srcFile,const char *refFile,const char *
     uint64_t maxColumn = ftell(fpRef) + 1;
     fseek(fpRef,0,SEEK_SET);
     LOGD("maxLine %ld,maxColumn %ld",maxLine,maxColumn);
+
+    totalSize = maxLine * maxColumn + (maxLine + maxColumn) * 2; // matrix + 回溯 + 输出
+    
     // step 3.compare len
     // 对比时尽量使用内存对比，因为需要索引访问内存数据，如果使用文件映射的方式，需要io，索引访问效率会降低
     // 但是当需要对比的文件很大时，打开文件需要用的时间已经和索引访问和对比的时间在同一个数量级，此时使用文件映射的方式，时间主要消耗在对比操作上
@@ -98,8 +112,13 @@ bool TxtComparator::compare(const char *srcFile,const char *refFile,const char *
 		}
 		while(!feof(fpSrc))fread(srcIndex++,1,1,fpSrc);
 		while(!feof(fpRef))fread(refIndex++,1,1,fpRef);
-		compareMatrix(matrix,(uint8_t*)src,(uint8_t*)ref,maxLine,maxColumn);
-		ret = outputMatrix(getOutputMatrix(matrix,maxLine,maxColumn),fpOut);
+		if(compareMatrix(matrix,(uint8_t*)src,(uint8_t*)ref,maxLine,maxColumn))
+		    ret = outputMatrix(getOutputMatrix(matrix,maxLine,maxColumn),fpOut);
+		else{
+		    // 比较过程中被中断
+		    ret = false;
+		    break;
+		}
 		fflush(fpOut);
 		delete[] src;
 		delete[] ref;
@@ -150,7 +169,7 @@ bool TxtComparator::compare(const char *srcFile,const char *refFile,const char *
     fclose(fpOut);
     return ret;
 }
-void TxtComparator::compareMatrix(MatrixNode *matrix,const uint8_t *src,const uint8_t *ref,uint64_t maxLine,uint64_t maxColumn)
+bool TxtComparator::compareMatrix(MatrixNode *matrix,const uint8_t *src,const uint8_t *ref,uint64_t maxLine,uint64_t maxColumn)
 {
     int i,j;
     i = j = 0;
@@ -167,6 +186,8 @@ void TxtComparator::compareMatrix(MatrixNode *matrix,const uint8_t *src,const ui
     {
 	for(j = 1; j< maxColumn; j++)
 	{
+	    if(!isRuning)
+		return false;
 	    (matrix + i * maxColumn + j) -> value = src[i-1]; // :无论是add,del or modify，所有节点的值都只需要用到src的值
 	    
 	    if(src[i-1] == ref[j-1])
@@ -181,8 +202,10 @@ void TxtComparator::compareMatrix(MatrixNode *matrix,const uint8_t *src,const ui
 		    (matrix + i*maxColumn + j-1) -> maxSubsequenceLen:
 		    (matrix + (i-1)*maxColumn + j) -> maxSubsequenceLen;
 	    }
+	    currentSize ++;
 	}
     }
+    return true;
 }
 /*
  * 1 a max
@@ -249,6 +272,9 @@ TxtComparator::MatrixNode *TxtComparator::getOutputMatrix(MatrixNode *matrix,uin
     uint64_t i = maxLine -1;
     uint64_t j = maxColumn -1;
     do{
+	if(!isRuning)
+	    return NULL;
+	currentSize ++;
 	if((i > 0) && (j > 0))
 	{
 	    int max = getMaxLocation((matrix + (i-1) * maxColumn + j-1) -> maxSubsequenceLen,(matrix + (i-1) * maxColumn + j) -> maxSubsequenceLen,(matrix + i * maxColumn + j-1) -> maxSubsequenceLen);
@@ -359,7 +385,7 @@ bool TxtComparator::outputMatrix(MatrixNode *matrix,FILE *fp)
     MatrixNode *tmp = matrix;
     char buf[sizeof("<span class=\"key\"></span>") + 1];
     memset(buf,0,sizeof(buf));
-    while(NULL != tmp)
+    while((NULL != tmp) && isRuning)
     {
 	switch(tmp->type)
 	{
@@ -401,6 +427,7 @@ bool TxtComparator::outputMatrix(MatrixNode *matrix,FILE *fp)
 	    return false;
 	}
 	// tmp = tmp -> nextNode;
+	currentSize ++;
     }
     // fclose(fp);
     return true;

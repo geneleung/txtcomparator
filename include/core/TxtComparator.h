@@ -8,6 +8,8 @@ public:
     TxtComparator();
     virtual ~TxtComparator();
     bool compare(const char *srcFile,const char *refFile,const char *outputFile);
+    void stop();
+    uint32_t getPercent();
 public:
     enum {
         MATRIX_NODE_TYPE_NONE  = 0,
@@ -31,7 +33,7 @@ private:
      *matrix指针所指空间比较足够大，此函数不做越界检查
      * 生成对比矩阵，每个矩阵节点包含对应最大公共字串和权重
      */
-    void compareMatrix(MatrixNode *matrix,const uint8_t *src,const uint8_t *ref,uint64_t maxLine,uint64_t maxColumn);
+    bool compareMatrix(MatrixNode *matrix,const uint8_t *src,const uint8_t *ref,uint64_t maxLine,uint64_t maxColumn);
     /*
      *根据对比矩阵输出对比文件
      */
@@ -42,7 +44,10 @@ private:
     // :end
 
 private:
-    FILE *matrixFile;
+    //: 以下三个成员虽然都会在不同的线程种操作，但是只有单个线程写，单个线程读，无需加锁处理
+    bool isRuning;
+    uint64_t totalSize;
+    uint64_t currentSize;
 };
 
 #endif //:TXT_COMPARATOR_H

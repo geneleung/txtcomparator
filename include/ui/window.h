@@ -26,7 +26,9 @@ private slots:
     void outBrowse();
     void compare();
     // :end
-
+private:
+    void disableAll();
+    void enableAll();
 private:
     QPushButton *createButton(const QString &text, const char *member);
     QComboBox *createComboBox(const QString &text = QString());
