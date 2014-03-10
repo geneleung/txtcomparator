@@ -245,6 +245,7 @@ bool TxtComparator::outputMatrix(MatrixNode *matrix,const char *outputFile)
 .key{color:black;}\
 .add{color:blue;}\
 .mod{color:red;}\
+.del{color:red;}\
 </style>";
     fwrite(css,sizeof(css),1,fp);
     // :end
@@ -257,19 +258,34 @@ bool TxtComparator::outputMatrix(MatrixNode *matrix,const char *outputFile)
 	{
 	case MATRIX_NODE_TYPE_KEY:
 	    fwrite("<span class=\"key\">",sizeof("<span class=\"key\">"),1,fp);
-	    fwrite(&(tmp->value),sizeof(uint8_t),1,fp);
+	    do{
+		fwrite(&(tmp->value),sizeof(uint8_t),1,fp);
+		tmp = tmp -> nextNode;
+	    }while((NULL != tmp) && (MATRIX_NODE_TYPE_KEY == tmp -> type));
 	    fwrite("</span>",sizeof("</span>"),1,fp);
 	    break;
 	case MATRIX_NODE_TYPE_ADD:
 	    fwrite("<span class=\"add\">",sizeof("<span class=\"add\">"),1,fp);
-	    fwrite(&(tmp->value),sizeof(uint8_t),1,fp);
+	    do{
+		fwrite(&(tmp->value),sizeof(uint8_t),1,fp);
+		tmp = tmp -> nextNode;
+	    }while((NULL != tmp) && (MATRIX_NODE_TYPE_ADD == tmp -> type));
 	    fwrite("</span>",sizeof("</span>"),1,fp);
 	    break;
 	case MATRIX_NODE_TYPE_DEL:
-	    fwrite("<span class=\"del\">_</span>",sizeof("<span class=\"del\">_</span>"),1,fp);break;
+	    fwrite("<span class=\"del\">",sizeof("<span class=\"del\">"),1,fp);
+	    do{
+		fwrite("_",sizeof("_"),1,fp);
+		tmp = tmp -> nextNode;
+	    }while((NULL != tmp) && (MATRIX_NODE_TYPE_DEL == tmp -> type));
+	    fwrite("</span>",sizeof("</span>"),1,fp);
+	    break;
 	case MATRIX_NODE_TYPE_MODIFY:
 	    fwrite("<span class=\"mod\">",sizeof("<span class=\"mod\">"),1,fp);
-	    fwrite(&(tmp->value),sizeof(uint8_t),1,fp);
+	    do{
+		fwrite(&(tmp->value),sizeof(uint8_t),1,fp);
+		tmp = tmp -> nextNode;
+	    }while((NULL != tmp) && (MATRIX_NODE_TYPE_MODIFY == tmp -> type));
 	    fwrite("</span>",sizeof("</span>"),1,fp);
 	    break;
 	default:
@@ -277,7 +293,7 @@ bool TxtComparator::outputMatrix(MatrixNode *matrix,const char *outputFile)
 	    fclose(fp);
 	    return false;
 	}
-	tmp = tmp -> nextNode;
+	// tmp = tmp -> nextNode;
     }
     fclose(fp);
     return true;
