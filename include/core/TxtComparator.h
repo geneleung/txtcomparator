@@ -15,18 +15,18 @@ public:
         MATRIX_NODE_TYPE_NONE  = 0,
         MATRIX_NODE_TYPE_KEY,
         MATRIX_NODE_TYPE_ADD,
-	MATRIX_NODE_TYPE_DEL,
-	MATRIX_NODE_TYPE_MODIFY,
+        MATRIX_NODE_TYPE_DEL,
+        MATRIX_NODE_TYPE_MODIFY,
     };
     // 方便处理大文件，直接使用内存映射
     struct MatrixNode
     {
-	uint64_t maxSubsequenceLen;//:max file size 2^64 = 2^14 PB,very large,that is enough~
-	// uint64_t line;
-	// uint64_t column;
-	MatrixNode *nextNode; //:下一个输出节点
-	uint32_t type;	      	// :放末尾，32位机对齐
-	uint8_t value;
+        uint64_t maxSubsequenceLen;//:max file size 2^64 = 2^14 PB,very large,that is enough~
+        // uint64_t line;
+        // uint64_t column;
+        MatrixNode *nextNode; //:下一个输出节点
+        uint32_t type;	      	// :放末尾，32位机对齐
+        uint8_t value;
     };
 private:
     /*

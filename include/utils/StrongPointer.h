@@ -13,7 +13,7 @@
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
- 
+
 #ifndef ANDROID_STRONG_POINTER_H
 #define ANDROID_STRONG_POINTER_H
 
@@ -28,35 +28,35 @@
 
 // ---------------------------------------------------------------------------
 namespace android {
-    // :by liangzhen
+// :by liangzhen
 // class TextOutput;
 // TextOutput& printStrongPointer(TextOutput& to, const void* val);
-    // :end
+// :end
 
 template<typename T> class wp;
 
 // ---------------------------------------------------------------------------
 
 #define COMPARE(_op_)                                           \
-inline bool operator _op_ (const sp<T>& o) const {              \
+    inline bool operator _op_ (const sp<T>& o) const {              \
     return m_ptr _op_ o.m_ptr;                                  \
 }                                                               \
-inline bool operator _op_ (const T* o) const {                  \
+    inline bool operator _op_ (const T* o) const {                  \
     return m_ptr _op_ o;                                        \
 }                                                               \
-template<typename U>                                            \
-inline bool operator _op_ (const sp<U>& o) const {              \
+    template<typename U>                                            \
+    inline bool operator _op_ (const sp<U>& o) const {              \
     return m_ptr _op_ o.m_ptr;                                  \
 }                                                               \
-template<typename U>                                            \
-inline bool operator _op_ (const U* o) const {                  \
+    template<typename U>                                            \
+    inline bool operator _op_ (const U* o) const {                  \
     return m_ptr _op_ o;                                        \
 }                                                               \
-inline bool operator _op_ (const wp<T>& o) const {              \
+    inline bool operator _op_ (const wp<T>& o) const {              \
     return m_ptr _op_ o.m_ptr;                                  \
 }                                                               \
-template<typename U>                                            \
-inline bool operator _op_ (const wp<U>& o) const {              \
+    template<typename U>                                            \
+    inline bool operator _op_ (const wp<U>& o) const {              \
     return m_ptr _op_ o.m_ptr;                                  \
 }
 
@@ -105,8 +105,8 @@ public:
     COMPARE(<=)
     COMPARE(>=)
 
-private:    
-    template<typename Y> friend class sp;
+    private:
+        template<typename Y> friend class sp;
     template<typename Y> friend class wp;
     void set_pointer(T* ptr);
     T* m_ptr;
@@ -114,27 +114,27 @@ private:
 
 #undef COMPARE
 
-    // :by liangzhen
+// :by liangzhen
 // template <typename T>
 // TextOutput& operator<<(TextOutput& to, const sp<T>& val);
-    // :end
+// :end
 
 // ---------------------------------------------------------------------------
 // No user serviceable parts below here.
 
 template<typename T>
 sp<T>::sp(T* other)
-: m_ptr(other)
-  {
+    : m_ptr(other)
+{
     if (other) other->incStrong(this);
-  }
+}
 
 template<typename T>
 sp<T>::sp(const sp<T>& other)
-: m_ptr(other.m_ptr)
-  {
+    : m_ptr(other.m_ptr)
+{
     if (m_ptr) m_ptr->incStrong(this);
-  }
+}
 
 template<typename T> template<typename U>
 sp<T>::sp(U* other) : m_ptr(other)
@@ -144,10 +144,10 @@ sp<T>::sp(U* other) : m_ptr(other)
 
 template<typename T> template<typename U>
 sp<T>::sp(const sp<U>& other)
-: m_ptr(other.m_ptr)
-  {
+    : m_ptr(other.m_ptr)
+{
     if (m_ptr) m_ptr->incStrong(this);
-  }
+}
 
 template<typename T>
 sp<T>::~sp()
@@ -212,13 +212,13 @@ template<typename T>
 void sp<T>::set_pointer(T* ptr) {
     m_ptr = ptr;
 }
-    // :by liangzhen
+// :by liangzhen
 // template <typename T>
 // inline TextOutput& operator<<(TextOutput& to, const sp<T>& val)
 // {
 //     return printStrongPointer(to, val.get());
 // }
-    // :end
+// :end
 
 }; // namespace android
 

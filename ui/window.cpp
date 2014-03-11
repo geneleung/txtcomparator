@@ -81,7 +81,7 @@ void Window::compare()
     out = out.append("/compare.html");
 
     if(src.isEmpty()||ref.isEmpty()||out.isEmpty())
-	return;
+        return;
     std::string ssrc = src.toStdString();
     std::string sref = ref.toStdString();
     std::string sout = out.toStdString();
@@ -102,14 +102,14 @@ void Window::compare()
 
     while(thread -> isRunning())
     {
-	QThread::sleep(1);
-	progressDialog.setValue(comparator -> getPercent());
-	progressDialog.setLabelText(tr("%1%").arg(comparator -> getPercent()));
-	
-	qApp->processEvents();
+        QThread::usleep(1000);
+        progressDialog.setValue(comparator -> getPercent());
+        progressDialog.setLabelText(tr("%1%").arg(comparator -> getPercent()));
 
-	if (progressDialog.wasCanceled())
-	    comparator -> stop();
+        qApp->processEvents();
+
+        if (progressDialog.wasCanceled())
+            comparator -> stop();
     }
     enableAll();
 }
@@ -152,7 +152,7 @@ void Window::enableAll()
     refBrowseButton -> setEnabled(true);
     outBrowseButton -> setEnabled(true);
     
-    compareButton -> setEnabled(true);    
+    compareButton -> setEnabled(true);
 }
 
 

@@ -34,26 +34,26 @@
 
 // ---------------------------------------------------------------------------
 namespace android {
-    // :by liangzhen
+// :by liangzhen
 // class TextOutput;
 // TextOutput& printWeakPointer(TextOutput& to, const void* val);
-    // :end
+// :end
 
 // ---------------------------------------------------------------------------
 
 #define COMPARE_WEAK(_op_)                                      \
-inline bool operator _op_ (const sp<T>& o) const {              \
+    inline bool operator _op_ (const sp<T>& o) const {              \
     return m_ptr _op_ o.m_ptr;                                  \
 }                                                               \
-inline bool operator _op_ (const T* o) const {                  \
+    inline bool operator _op_ (const T* o) const {                  \
     return m_ptr _op_ o;                                        \
 }                                                               \
-template<typename U>                                            \
-inline bool operator _op_ (const sp<U>& o) const {              \
+    template<typename U>                                            \
+    inline bool operator _op_ (const sp<U>& o) const {              \
     return m_ptr _op_ o.m_ptr;                                  \
 }                                                               \
-template<typename U>                                            \
-inline bool operator _op_ (const U* o) const {                  \
+    template<typename U>                                            \
+    inline bool operator _op_ (const U* o) const {                  \
     return m_ptr _op_ o;                                        \
 }
 
@@ -71,13 +71,13 @@ public:
 class RefBase
 {
 public:
-            void            incStrong(const void* id) const;
-            void            decStrong(const void* id) const;
+    void            incStrong(const void* id) const;
+    void            decStrong(const void* id) const;
     
-            void            forceIncStrong(const void* id) const;
+    void            forceIncStrong(const void* id) const;
 
-            //! DEBUGGING ONLY: Get current strong ref count.
-            int32_t         getStrongCount() const;
+    //! DEBUGGING ONLY: Get current strong ref count.
+    int32_t         getStrongCount() const;
 
     class weakref_type
     {
@@ -105,29 +105,29 @@ public:
         // enable -- enable/disable tracking
         // retain -- when tracking is enable, if true, then we save a stack trace
         //           for each reference and dereference; when retain == false, we
-        //           match up references and dereferences and keep only the 
+        //           match up references and dereferences and keep only the
         //           outstanding ones.
         
         void                trackMe(bool enable, bool retain);
     };
     
-            weakref_type*   createWeak(const void* id) const;
-            
-            weakref_type*   getWeakRefs() const;
+    weakref_type*   createWeak(const void* id) const;
 
-            //! DEBUGGING ONLY: Print references held on object.
+    weakref_type*   getWeakRefs() const;
+
+    //! DEBUGGING ONLY: Print references held on object.
     inline  void            printRefs() const { getWeakRefs()->printRefs(); }
 
-            //! DEBUGGING ONLY: Enable tracking of object.
+    //! DEBUGGING ONLY: Enable tracking of object.
     inline  void            trackMe(bool enable, bool retain)
-    { 
-        getWeakRefs()->trackMe(enable, retain); 
+    {
+        getWeakRefs()->trackMe(enable, retain);
     }
 
     typedef RefBase basetype;
 
 protected:
-                            RefBase();
+    RefBase();
     virtual                 ~RefBase();
 
     //! Flags for extendObjectLifetime()
@@ -137,8 +137,8 @@ protected:
         OBJECT_LIFETIME_MASK    = 0x0001
     };
     
-            void            extendObjectLifetime(int32_t mode);
-            
+    void            extendObjectLifetime(int32_t mode);
+
     //! Flags for onIncStrongAttempted()
     enum {
         FIRST_INC_STRONG = 0x0001
@@ -152,16 +152,16 @@ protected:
 private:
     friend class ReferenceMover;
     static void moveReferences(void* d, void const* s, size_t n,
-            const ReferenceConverterBase& caster);
+                               const ReferenceConverterBase& caster);
 
 private:
     friend class weakref_type;
     class weakref_impl;
     
-                            RefBase(const RefBase& o);
-            RefBase&        operator=(const RefBase& o);
+    RefBase(const RefBase& o);
+    RefBase&        operator=(const RefBase& o);
 
-        weakref_impl* const mRefs;
+    weakref_impl* const mRefs;
 };
 
 // ---------------------------------------------------------------------------
@@ -192,7 +192,7 @@ protected:
 private:
     friend class ReferenceMover;
     inline static void moveReferences(void* d, void const* s, size_t n,
-            const ReferenceConverterBase& caster) { }
+                                      const ReferenceConverterBase& caster) { }
 
 private:
     mutable volatile int32_t mCount;
@@ -275,11 +275,11 @@ public:
     inline bool operator < (const wp<U>& o) const {
         return (m_ptr == o.m_ptr) ? (m_refs < o.m_refs) : (m_ptr < o.m_ptr);
     }
-                         inline bool operator != (const wp<T>& o) const { return m_refs != o.m_refs; }
+    inline bool operator != (const wp<T>& o) const { return m_refs != o.m_refs; }
     template<typename U> inline bool operator != (const wp<U>& o) const { return !operator == (o); }
-                         inline bool operator <= (const wp<T>& o) const { return !operator > (o); }
+    inline bool operator <= (const wp<T>& o) const { return !operator > (o); }
     template<typename U> inline bool operator <= (const wp<U>& o) const { return !operator > (o); }
-                         inline bool operator >= (const wp<T>& o) const { return !operator < (o); }
+    inline bool operator >= (const wp<T>& o) const { return !operator < (o); }
     template<typename U> inline bool operator >= (const wp<U>& o) const { return !operator < (o); }
 
 private:
@@ -289,10 +289,10 @@ private:
     T*              m_ptr;
     weakref_type*   m_refs;
 };
-    // :by liangzhen
+// :by liangzhen
 // template <typename T>
 // TextOutput& operator<<(TextOutput& to, const wp<T>& val);
-    // :end
+// :end
 
 #undef COMPARE_WEAK
 
@@ -358,7 +358,7 @@ template<typename T>
 wp<T>& wp<T>::operator = (T* other)
 {
     weakref_type* newRefs =
-        other ? other->createWeak(this) : 0;
+            other ? other->createWeak(this) : 0;
     if (m_ptr) m_refs->decWeak(this);
     m_ptr = other;
     m_refs = newRefs;
@@ -381,7 +381,7 @@ template<typename T>
 wp<T>& wp<T>::operator = (const sp<T>& other)
 {
     weakref_type* newRefs =
-        other != NULL ? other->createWeak(this) : 0;
+            other != NULL ? other->createWeak(this) : 0;
     T* otherPtr(other.m_ptr);
     if (m_ptr) m_refs->decWeak(this);
     m_ptr = otherPtr;
@@ -393,7 +393,7 @@ template<typename T> template<typename U>
 wp<T>& wp<T>::operator = (U* other)
 {
     weakref_type* newRefs =
-        other ? other->createWeak(this) : 0;
+            other ? other->createWeak(this) : 0;
     if (m_ptr) m_refs->decWeak(this);
     m_ptr = other;
     m_refs = newRefs;
@@ -416,7 +416,7 @@ template<typename T> template<typename U>
 wp<T>& wp<T>::operator = (const sp<U>& other)
 {
     weakref_type* newRefs =
-        other != NULL ? other->createWeak(this) : 0;
+            other != NULL ? other->createWeak(this) : 0;
     U* otherPtr(other.m_ptr);
     if (m_ptr) m_refs->decWeak(this);
     m_ptr = otherPtr;
@@ -451,13 +451,13 @@ void wp<T>::clear()
         m_ptr = 0;
     }
 }
-    // :by liangzhen
+// :by liangzhen
 // template <typename T>
 // inline TextOutput& operator<<(TextOutput& to, const wp<T>& val)
 // {
 //     return printWeakPointer(to, val.unsafe_get());
 // }
-    // :end
+// :end
 
 // ---------------------------------------------------------------------------
 

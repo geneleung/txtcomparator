@@ -21,28 +21,28 @@ typedef enum LOG_LEVEL_E
 /* :if you want output the log msg to file or net,just modify __LOG_PRINT__ as a function */
 #define __LOG_PRINT__(level,module,...)\
     do{ \
-        if ( LOG_LEVEL_INFO == level ) \
-        { \
-            printf("INFO\t");\
-        } \
-	else if ( LOG_LEVEL_WARNING == level )	\
-        { \
-            printf("WARNING\t");\
-        } \
-	else if ( LOG_LEVEL_DEBUG == level )	\
-        { \
-            printf("DEBUG\t");\
-        } \
-	else if ( LOG_LEVEL_ERROR == level )	\
-        { \
-            printf("ERROR\t");\
-        } \
-	printf(module" function:%s line:%d > ",__FUNCTION__,__LINE__);	\
-	printf(__VA_ARGS__);\
-	printf("\r\n");\
-    }while(0)
+    if ( LOG_LEVEL_INFO == level ) \
+{ \
+    printf("INFO\t");\
+} \
+    else if ( LOG_LEVEL_WARNING == level )	\
+{ \
+    printf("WARNING\t");\
+} \
+    else if ( LOG_LEVEL_DEBUG == level )	\
+{ \
+    printf("DEBUG\t");\
+} \
+    else if ( LOG_LEVEL_ERROR == level )	\
+{ \
+    printf("ERROR\t");\
+} \
+    printf(module" function:%s line:%d > ",__FUNCTION__,__LINE__);	\
+    printf(__VA_ARGS__);\
+    printf("\r\n");\
+}while(0)
 
-    
+
 #ifndef LOGV
 #define LOGV(...) __LOG_PRINT__(LOG_LEVEL_INFO, LOG_TAG, __VA_ARGS__)
 #endif

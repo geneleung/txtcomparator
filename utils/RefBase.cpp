@@ -13,7 +13,7 @@
   * See the License for the specific language governing permissions and
   * limitations under the License.
   */
- 
+
 #define LOG_TAG "RefBase"
 // :by liangzhen
 // #include <utils/RefBase.h>
@@ -179,7 +179,7 @@ public:
     }
 
     void trackMe(bool track, bool retain)
-    { 
+    {
         mTrackEnabled = track;
         mRetain = retain;
     }
@@ -209,7 +209,7 @@ public:
                 ALOGD("STACK TRACE for %p saved in %s", this, name);
             }
             else ALOGE("FAILED TO PRINT STACK TRACE for %p in %s: %s", this,
-                      name, strerror(errno));
+                       name, strerror(errno));
         }
     }
 
@@ -262,13 +262,13 @@ private:
 
 #if DEBUG_REFS_FATAL_SANITY_CHECKS
             LOG_ALWAYS_FATAL("RefBase: removing id %p on RefBase %p"
-                    "(weakref_type %p) that doesn't exist!",
-                    id, mBase, this);
+                             "(weakref_type %p) that doesn't exist!",
+                             id, mBase, this);
 #endif
 
             ALOGE("RefBase: removing id %p on RefBase %p"
-                    "(weakref_type %p) that doesn't exist!",
-                    id, mBase, this);
+                  "(weakref_type %p) that doesn't exist!",
+                  id, mBase, this);
 
             ref = head;
             while (ref) {
@@ -302,7 +302,7 @@ private:
         char buf[128];
         while (refs) {
             char inc = refs->ref >= 0 ? '+' : '-';
-            sprintf(buf, "\t%c ID %p (ref %d):\n", 
+            sprintf(buf, "\t%c ID %p (ref %d):\n",
                     inc, refs->id, refs->ref);
             out->append(buf);
 #if DEBUG_REFS_CALLSTACK_ENABLED
@@ -460,14 +460,14 @@ bool RefBase::weakref_type::attemptIncStrong(const void* id)
             // implementation doesn't need to see this), or if the implementation
             // allows it to happen.
             allow = (impl->mFlags&OBJECT_LIFETIME_WEAK) != OBJECT_LIFETIME_WEAK
-                  || impl->mBase->onIncStrongAttempted(FIRST_INC_STRONG, id);
+                    || impl->mBase->onIncStrongAttempted(FIRST_INC_STRONG, id);
         } else {
             // Attempting to revive the object...  this is allowed
             // if the object DOES have a longer lifetime (so we can safely
             // call the object with only a weak ref) and the implementation
             // allows it to happen.
             allow = (impl->mFlags&OBJECT_LIFETIME_WEAK) == OBJECT_LIFETIME_WEAK
-                  && impl->mBase->onIncStrongAttempted(FIRST_INC_STRONG, id);
+                    && impl->mBase->onIncStrongAttempted(FIRST_INC_STRONG, id);
         }
         if (!allow) {
             decWeak(id);
@@ -596,7 +596,7 @@ void RefBase::onLastWeakRef(const void* /*id*/)
 // ---------------------------------------------------------------------------
 
 void RefBase::moveReferences(void* dst, void const* src, size_t n,
-        const ReferenceConverterBase& caster)
+                             const ReferenceConverterBase& caster)
 {
 #if DEBUG_REFS
     const size_t itemSize = caster.getReferenceTypeSize();
@@ -611,7 +611,7 @@ void RefBase::moveReferences(void* dst, void const* src, size_t n,
 }
 
 // ---------------------------------------------------------------------------
-    // :by liangzhen
+// :by liangzhen
 // TextOutput& printStrongPointer(TextOutput& to, const void* val)
 // {
 //     to << "sp<>(" << val << ")";
@@ -623,6 +623,6 @@ void RefBase::moveReferences(void* dst, void const* src, size_t n,
 //     to << "wp<>(" << val << ")";
 //     return to;
 // }
-    // :end
+// :end
 
 }; // namespace android

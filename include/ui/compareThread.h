@@ -7,19 +7,19 @@
 
 class CompareThread : public QThread
 {
-Q_OBJECT
+    Q_OBJECT
 
 public:
-CompareThread(android::sp<TxtComparator> c,const char *s,const char *r,const char *o);
-~CompareThread();
+    CompareThread(android::sp<TxtComparator> c,const char *s,const char *r,const char *o);
+    ~CompareThread();
 
-void run();
+    void run();
     
 private:
-android::sp<TxtComparator> comparator;
-const char *src;
-const char *ref;
-const char *out;
+    android::sp<TxtComparator> comparator;
+    const char *src;
+    const char *ref;
+    const char *out;
 };
 
 #endif
