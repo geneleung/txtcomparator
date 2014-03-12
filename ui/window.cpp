@@ -111,6 +111,7 @@ void Window::compare()
         if (progressDialog.wasCanceled())
             comparator -> stop();
     }
+    delete thread;
     enableAll();
 }
 
